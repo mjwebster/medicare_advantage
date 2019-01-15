@@ -1,0 +1,94 @@
+---
+title: "enrollment_compare"
+author: "MaryJoWebster"
+date: "January 15, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+```
+
+
+```{r, code=readLines("compare_medicare_enrollment.R"), echo=FALSE, warning=FALSE, message=FALSE}
+
+
+```
+
+
+```{r}
+enroll_compare %>% group_by(yrmonth) %>% summarise(totalenroll=sum(enroll2)) %>%   kable("html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F, position="left")
+  
+
+```
+
+```{r}
+
+
+
+
+
+
+  
+```
+
+```{r}
+#national totals by parent organization
+
+enroll_by_parent <-  enroll_compare %>% group_by(parent, yrmonth) %>% summarise(totalenroll=sum(enroll2))
+
+enroll_by_parent <-  dcast(enroll_by_parent, parent ~ yrmonth)
+
+
+
+# replace_null_values -----------------------------------------------------
+
+
+enroll_by_parent$current[is.na(enroll_by_parent$current)] <- 0
+enroll_by_parent$previous[is.na(enroll_by_parent$previous)] <- 0
+
+parent_totals_export <- enroll_by_parent %>%
+  select(parent, previous, current) %>%
+  mutate(
+    pcttotal_previous = previous/sum(previous),
+    pcttotal_current  = current/sum(current),
+    pctchange=case_when(previous==0~ 9999, 
+                             current==0~ 9999,
+                             TRUE~ (current-previous)/previous)) %>% 
+  arrange(desc(pcttotal_current))
+
+
+parent_totals_export
+
+#write.csv(parent_totals_export, 'parent_totals.csv', row.names=FALSE)  
+
+enroll_compare %>% group_by(planID) %>% summarise(count=n())
+```
+
+```{r}
+names(enroll_compare)
+```
+
+```{r}
+mn_united <- enroll_compare %>% filter(state=='MN', parent=='UnitedHealth Group, Inc.') %>% group_by(county, yrmonth) %>% summarise(totalenroll=sum(enroll2))
+
+mn_united <-  dcast(mn_united, county ~ yrmonth)
+
+mn_united$current[is.na(mn_united$current)] <- 0
+mn_united$previous[is.na(mn_united$previous)] <- 0
+
+mn_united_by_county <-  mn_united %>% select(county, previous, current) %>% 
+  mutate(pctchange = (current-previous)/previous) %>% 
+  arrange(desc(pctchange))
+
+write.csv(mn_united_by_county, 'mn_united_by_county.csv', row.names=FALSE)
+```
+
+
+```{r}
+
+```
+
