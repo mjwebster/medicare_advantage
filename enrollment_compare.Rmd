@@ -38,7 +38,7 @@ enroll_compare %>% group_by(yrmonth) %>% summarise(totalenroll=sum(enroll2)) %>%
 ```{r}
 #national totals by parent organization
 
-enroll_by_parent <-  enroll_compare %>% group_by(parent, yrmonth) %>% summarise(totalenroll=sum(enroll2))
+enroll_by_parent <-  enroll_compare %>% group_by(parent, yrmonthe) %>% summarise(totalenroll=sum(enroll2))
 
 enroll_by_parent <-  dcast(enroll_by_parent, parent ~ yrmonth)
 
@@ -61,11 +61,19 @@ parent_totals_export <- enroll_by_parent %>%
   arrange(desc(pcttotal_current))
 
 
-parent_totals_export
+parent_totals_export %>% filter(parent=='Medica Holding Company')
 
 #write.csv(parent_totals_export, 'parent_totals.csv', row.names=FALSE)  
 
 enroll_compare %>% group_by(planID) %>% summarise(count=n())
+
+
+
+
+
+medica <-  enroll_compare %>% filter(parent=='Medica Holding Company') %>% group_by(parent, plan_type, yrmonth) %>% summarise(totalenroll=sum(enroll2))
+
+write.csv(medica, 'medica.csv', row.names=FALSE)
 ```
 
 ```{r}
