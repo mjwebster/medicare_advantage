@@ -37,13 +37,13 @@ states <-  read_csv("./data/state fips codes.csv") %>% rename(state=statename)
 #enrollment and contract files import & merge
 
 #current month from CPSC file
-enroll_CPSC_current <-  read_csv("./data/CPSC_Enrollment_Info_2019_01.csv", col_types = cols(.default="c", `Plan ID`="i")) %>%
+enroll_CPSC_current <-  read_csv("./data/CPSC_Enrollment_Info_2019_02.csv", col_types = cols(.default="c", `Plan ID`="i")) %>%
   rename(contractID=`Contract Number`,planID=`Plan ID`, ssa_code=`SSA State County Code`,
          fips=`FIPS State County Code`, state=`State`, county=`County`, enrollment=`Enrollment`) 
 
 enroll_CPSC_current$enroll2 = as.numeric(gsub("\\*", 0, enroll_CPSC_current$enrollment))
 
-contract_current <- read_csv("./data/CPSC_Contract_Info_2019_01.csv", col_types = cols(.default="c",`Plan ID`="i")) %>%
+contract_current <- read_csv("./data/CPSC_Contract_Info_2019_02.csv", col_types = cols(.default="c",`Plan ID`="i")) %>%
   rename(contractID=`Contract ID`, planID=`Plan ID`, organization_type=`Organization Type`,
          plan_type=`Plan Type`, offers_part_D=`Offers Part D`, SNP_plan=`SNP Plan`,
          eghp=EGHP, organization=`Organization Name`, org_marketing=`Organization Marketing Name`,
@@ -58,14 +58,14 @@ enroll_CPSC_current <-  left_join(enroll_CPSC_current, contract_current %>%
 
   
 #prevoius month
-enroll_CPSC_previous <-  read_csv("./data/CPSC_Enrollment_Info_2018_12.csv", col_types = cols(.default="c", `Plan ID`="i")) %>%
+enroll_CPSC_previous <-  read_csv("./data/CPSC_Enrollment_Info_2019_01.csv", col_types = cols(.default="c", `Plan ID`="i")) %>%
 rename(contractID=`Contract Number`,planID=`Plan ID`, ssa_code=`SSA State County Code`,
        fips=`FIPS State County Code`, state=`State`, county=`County`, enrollment=`Enrollment`) 
 
 enroll_CPSC_previous$enroll2 = as.numeric(gsub("\\*", 0, enroll_CPSC_previous$enrollment))
 
 
-contract_previous <- read_csv("./data/CPSC_Contract_Info_2018_12.csv", col_types = cols(.default="c",`Plan ID`="i")) %>%
+contract_previous <- read_csv("./data/CPSC_Contract_Info_2019_01.csv", col_types = cols(.default="c",`Plan ID`="i")) %>%
   rename(contractID=`Contract ID`, planID=`Plan ID`, organization_type=`Organization Type`,
          plan_type=`Plan Type`, offers_part_D=`Offers Part D`, SNP_plan=`SNP Plan`,
          eghp=EGHP, organization=`Organization Name`, org_marketing=`Organization Marketing Name`,
@@ -122,11 +122,23 @@ mn_SCC_Dec2018 <- enroll_SCC_previous %>% filter(state=='MN', enrollment>0)
 
 
 mn_CPSC_current <- enroll_CPSC_current %>% filter(state=='MN') 
-#write.csv(mn_CPSC_current, 'mn_CPSC_current.csv', row.names = FALSE)
+write.csv(mn_CPSC_current, 'mn_CPSC_current.csv', row.names = FALSE)
 
 
 mn_CPSC_previous <- enroll_CPSC_previous %>% filter(state=='MN') 
 #write.csv(mn_CPSC_previous, 'mn_CPSC_previous.csv', row.names = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+# SPECIAL EXPORTS ---------------------------------------------------------
 
 
 
@@ -145,12 +157,12 @@ parent_orgs <- enroll_CPSC_current %>% group_by(parent) %>% summarise(count=n())
 CPSC_current_Medica_Bright_HPUnity <-  enroll_CPSC_current %>% filter(parent=='Bright Health Management' | 
                                                                 parent == 'HealthPartners UnityPoint Health, Inc.' |
                                                                   parent=='Medica Holding Company')
-write.csv(CPSC_current_Medica_Bright_HPUnity, 'CPSC_current_Medica_Bright_HPUnity.csv', row.names = FALSE)
+#write.csv(CPSC_current_Medica_Bright_HPUnity, 'CPSC_current_Medica_Bright_HPUnity.csv', row.names = FALSE)
 
 CPSC_previous_Medica_Bright_HPUnity <-  enroll_CPSC_previous %>% filter(parent=='Bright Health Management' | 
                                                                           parent == 'HealthPartners UnityPoint Health, Inc.' |
                                                                           parent=='Medica Holding Company')
-write.csv(CPSC_previous_Medica_Bright_HPUnity, 'CPSC_previous_Medica_Bright_HPUnity.csv', row.names = FALSE)
+#write.csv(CPSC_previous_Medica_Bright_HPUnity, 'CPSC_previous_Medica_Bright_HPUnity.csv', row.names = FALSE)
 
 
 

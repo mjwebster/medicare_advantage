@@ -43,14 +43,14 @@ library(ggthemes)
 
 #Also need state abbreviation conversion table
 
-states <-  read_csv("state fips codes.csv") %>% rename(state=statename)
+states <-  read_csv("./data/state fips codes.csv") %>% rename(state=statename)
 
 
 
 
 #enrollment file import
 
-enroll <-  read_csv("CPSC_Enrollment_Info_2018_08.csv", col_types = cols(.default="c", `Plan ID`="i")) %>%
+enroll <-  read_csv("./data/CPSC_Enrollment_Info_2019_02.csv", col_types = cols(.default="c", `Plan ID`="i")) %>%
   rename(contractID=`Contract Number`,planID=`Plan ID`, ssa_code=`SSA State County Code`,
           fips=`FIPS State County Code`, state=`State`, county=`County`, enrollment=`Enrollment`) %>% 
   filter(state=='MN')
@@ -64,19 +64,26 @@ enroll <-  read_csv("CPSC_Enrollment_Info_2018_08.csv", col_types = cols(.defaul
 
 
 #import cost files for year 1
-costyr1_A_M <-  read_csv("2018LandscapeSource file MA_AtoM 10142017.csv", col_types = cols(.default="c", planID="i"))
-costyr1_N_W <- read_csv("2018LandscapeSource file MA_NtoW 10142017.csv", col_types = cols(.default="c", planID="i"))
+costyr1_A_M <-  read_csv("./data/2018LandscapeSource file MA_AtoM 10142017.csv", col_types = cols(.default="c", planID="i"))
+costyr1_N_W <- read_csv("./data/2018LandscapeSource file MA_NtoW 10142017.csv", col_types = cols(.default="c", planID="i")) 
 
 #combine the year 1 cost files
-costyr1 <-  rbind(costyr1_A_M, costyr1_N_W)
+costyr1 <-  rbind(costyr1_A_M, costyr1_N_W) %>% clean_names()
+
 
 
 #import cost files for year 2
-costyr2_A_M <-  read_csv("2019LandscapeSource file MA_AtoM 10012018.csv", col_types = cols(.default="c", planID="i"))
-costyr2_N_W <-  read_csv("2019LandscapeSource file MA_NtoW 10012018.csv", col_types = cols(.default="c",planID="i"))
+costyr2_A_M <-  read_csv("./data/2019LandscapeSource file MA_AtoM 10012018.csv", col_types = cols(.default="c", planID="i"))
+costyr2_N_W <-  read_csv("./data/2019LandscapeSource file MA_NtoW 10012018.csv", col_types = cols(.default="c",planID="i"))
 
 #Combine the year 2 cost files
-costyr2 <-  rbind(costyr2_A_M, costyr2_N_W)
+costyr2 <-  rbind(costyr2_A_M, costyr2_N_W) %>% clean_names() %>%
+  rename(monthly_premium=monthly_consolidated_premium_includes_part_c_d,
+         drug_deduct=annual_drug_deductible,
+         moop=in_network_moop_amount)
+
+
+names(costyr2)
 
 
 #remove uncessary files
@@ -107,6 +114,10 @@ costyr2$drug_deduct2[is.na(costyr2$drug_deduct2)] <- 0
 costyr2$moop2[is.na(costyr2$moop2)] <- 0
 
 
+#zero_premium <-  costyr2 %>% filter(monthly_premium2==0)
+#write.csv(zero_premium, 'zero_premiums.csv', row.names=FALSE)
+
+
 #add state abbreviation field to costyr1 and costyr2
 
 costyr1 <- inner_join(costyr1, states, by=c("state", "state")) %>% filter(state=='Minnesota')%>% mutate(datayear="year1")
@@ -119,7 +130,7 @@ costyr2 <- inner_join(costyr2, states, by=c("state", "state")) %>% filter(state=
 # IMPORT CONTRACT INFO FILE -----------------------------------------------
 
 
-contract_info <- read_csv("CPSC_Contract_Info_2018_08.csv", col_types = cols(.default="c",`Plan ID`="i")) %>%
+contract_info <- read_csv("./data/CPSC_Contract_Info_2018_08.csv", col_types = cols(.default="c",`Plan ID`="i")) %>%
   rename(contractID=`Contract ID`, planID=`Plan ID`, organization_type=`Organization Type`,
          plan_type=`Plan Type`, offers_part_D=`Offers Part D`, SNP_plan=`SNP Plan`,
          eghp=EGHP, organization=`Organization Name`, org_marketing=`Organization Marketing Name`,
